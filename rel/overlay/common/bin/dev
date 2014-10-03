@@ -16,19 +16,15 @@ fi
 cd $RUNNER_BASE_DIR
 
 # Extract the target node name from node.args
-NAME_ARG=`grep -e '-[s]*name' $RUNNER_ETC_DIR/vm.args`
-if [ -z "$NAME_ARG" ]; then
-    echo "vm.args needs to have either -name or -sname parameter."
-    exit 1
-fi
+NAME_ARG="-sname $USER"
 
 # Learn how to specify node name for connection from remote nodes
-if  echo $NAME_ARG | grep -E "^-sname" > /dev/null ; then
+if [[ "$NAME_ARG" =~ ^-sname ]]; then
     NAME_PARAM="-sname"
     NAME_HOST=""
 else
     NAME_PARAM="-name"
-    if echo $NAME_ARG | grep -E "(@.*)" > /dev/null ; then
+    if [[ "$NAME_ARG" =~ (@.*) ]]; then
         NAME_HOST=${BASH_REMATCH[1]}
     else
         NAME_HOST=""
@@ -37,10 +33,6 @@ fi
 
 # Extract the target cookie
 COOKIE_ARG=`grep -e '-setcookie' $RUNNER_ETC_DIR/vm.args`
-if [ -z "$COOKIE_ARG" ]; then
-    echo "vm.args needs to have a -setcookie parameter."
-    exit 1
-fi
 
 # Identify the script name
 SCRIPT=`basename $0`
