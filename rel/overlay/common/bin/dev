@@ -32,7 +32,7 @@ else
 fi
 
 # Extract the target cookie
-COOKIE_ARG=`grep -e '-setcookie' $RUNNER_ETC_DIR/vm.args`
+COOKIE_ARG="" # `grep -e '-setcookie' $RUNNER_ETC_DIR/vm.args`
 
 # Identify the script name
 SCRIPT=`basename $0`

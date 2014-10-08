@@ -31,45 +31,46 @@ git_key () {
     GIT_SSH="$HOME/.nitrogen/bin/git_wrapper" git $@
 }
 
+remote_ssh () {
+    ssh -i ~/.nitrogen/keys/id_rsa $SSH_URL $@
+}
 case $1 in
     console)
-       CMD="$ERL_CMD  -args_file $NITROGEN_DIR/etc/vm.args"
-       (cd .. && $CMD)
-       ;;
-   compile)
-       ERL_LIBS=$NITROGEN_DIR/lib $NITROGEN_DIR/rebar compile
-       ;;
-   deploy)
-       git_key push
-       ;;
-   local_db_init)
-       (cd .. && $ERL_CMD -noshell -eval "db:install(), init:stop()")
-       ;;
-   remote_db_init)
-       CMD="ssh -i $HOME/.nitrogen/keys/id_rsa $SSH_URL db_init"
-       echo $CMD
-       $CMD
-       ;;
-   remote_db_update)
-       CMD="ssh -i $HOME/.nitrogen/keys/id_rsa $SSH_URL db_update"
-       echo $CMD
-       $CMD
-       ;;
-   init)
-       if [ ! -d ~/.nitrogen/keys ]; then
-           mkdir -p ~/.nitrogen/keys
-           ssh-keygen -t rsa -f ~/.nitrogen/keys/id_rsa
-       fi
-           
-       ssh $2@d4d-pro.com "pubkey `cat ~/.nitrogen/keys/id_rsa.pub`"
+        CMD="$ERL_CMD  -args_file $NITROGEN_DIR/etc/vm.args"
+        (cd .. && $CMD)
+        ;;
+    compile)
+        ERL_LIBS=$NITROGEN_DIR/lib $NITROGEN_DIR/rebar compile
+        ;;
+    deploy)
+        git_key push
+        ;;
+    db_init)
+        (cd .. && $ERL_CMD -noshell -eval "db:install(), init:stop()")
+        ;;
+    db_update)
+        (cd .. && $ERL_CMD -noshell -eval "db:update(), init:stop()")
+        ;;
+    remote)
+        shift
+        echo $@
+        remote $@
+        ;;
+    init)
+        if [ ! -d ~/.nitrogen/keys ]; then
+            mkdir -p ~/.nitrogen/keys
+            ssh-keygen -t rsa -f ~/.nitrogen/keys/id_rsa
+        fi
 
-       cd $PROJECT_PATH
-       git_key clone ssh://$2@d4d-pro.com/home/$2/site.git;
-       cd site;
-       touch .project
-       ;;
-   *)
-       $0 console
-       ;;
+        ssh $SSH_URL "pubkey `cat ~/.nitrogen/keys/id_rsa.pub`"
+
+        cd $PROJECT_PATH
+        git_key clone $REPO_URL
+        cd site;
+        touch .project
+        ;;
+    *)
+        $0 console
+        ;;
 esac
 
