@@ -6,7 +6,8 @@ SERVER_URL="d4d-pro.com"
 PROJECT_PATH=$PWD
 NITROGEN_DIR=$HOME/.nitrogen
 NITROGEN_BOOT=$NITROGEN_DIR/releases/*/nitrogen
-ERL_BIN=$NITROGEN_DIR/erts-*/bin/erl
+ERTS_BIN_DIR=$NITROGEN_DIR/erts-*/bin
+ERL_BIN=$ERTS_BIN_DIR/erl
 
 while [ "$PWD" !=  / ]; do
    if [ -f .project ]; then
@@ -24,6 +25,7 @@ ERL_FULLSWEEP_AFTER=10
 ERL_MAX_PORTS=4096
 ERL_LIBS=$NITROGEN_DIR/lib
 ERL_CMD="$ERL_BIN -pa $PROJECT_PATH/ebin -config $NITROGEN_DIR/etc/app -sname "$USER" -config $NITROGEN_DIR/etc/cowboy"
+DEV_CMD="$ERTS_BIN_DIR/escript $ERTS_BIN_DIR/nodetool -sname $USER rpc nitrogen_dev command" 
 
 SSH_URL=$PROJECT@$SERVER_URL
 REPO_URL="ssh://$SSH_URL/home/$PROJECT/site.git"
@@ -46,6 +48,10 @@ case $1 in
         ;;
     deploy)
         git_key push
+        ;;
+    push)
+        shift;
+        git_key push $@
         ;;
     db_init)
         (cd .. && $ERL_CMD -noshell -eval "db:install(), init:stop()")
@@ -72,6 +78,10 @@ case $1 in
         echo $2 > .project
         git config push.default matching
         ;;
+    page|action|element)
+        $DEV_CMD $@
+        ;;
+
     *)
         $0 console
         ;;
