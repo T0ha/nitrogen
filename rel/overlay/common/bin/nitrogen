@@ -17,6 +17,7 @@ done
 
 if [ "$PWD" != / ]; then
     PROJECT_PATH=$PWD
+    PROJECT=`cat .project`
 fi
 
 ERL_FULLSWEEP_AFTER=10
@@ -24,8 +25,8 @@ ERL_MAX_PORTS=4096
 ERL_LIBS=$NITROGEN_DIR/lib
 ERL_CMD="$ERL_BIN -pa $PROJECT_PATH/ebin -config $NITROGEN_DIR/etc/app -sname "$USER" -config $NITROGEN_DIR/etc/cowboy"
 
-SSH_URL=$2@$SERVER_URL
-REPO_URL="ssh://$SSH_URL/home/$2/site.git"
+SSH_URL=$PROJECT@$SERVER_URL
+REPO_URL="ssh://$SSH_URL/home/$PROJECT/site.git"
 
 git_key () {
     GIT_SSH="$HOME/.nitrogen/bin/git_wrapper" git $@
@@ -34,6 +35,7 @@ git_key () {
 remote_ssh () {
     ssh -i ~/.nitrogen/keys/id_rsa $SSH_URL $@
 }
+
 case $1 in
     console)
         CMD="$ERL_CMD  -args_file $NITROGEN_DIR/etc/vm.args"
@@ -54,7 +56,7 @@ case $1 in
     remote)
         shift
         echo $@
-        remote $@
+        remote_ssh $@
         ;;
     init)
         if [ ! -d ~/.nitrogen/keys ]; then
@@ -67,7 +69,8 @@ case $1 in
         cd $PROJECT_PATH
         git_key clone $REPO_URL
         cd site;
-        touch .project
+        echo $2 > .project
+        git config push.default matching
         ;;
     *)
         $0 console
