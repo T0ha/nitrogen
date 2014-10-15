@@ -25,7 +25,8 @@ ERL_FULLSWEEP_AFTER=10
 ERL_MAX_PORTS=4096
 ERL_LIBS=$NITROGEN_DIR/lib
 ERL_CMD="$ERL_BIN -pa $PROJECT_PATH/ebin -config $NITROGEN_DIR/etc/app -sname "$USER" -config $NITROGEN_DIR/etc/cowboy"
-DEV_CMD="$ERTS_BIN_DIR/escript $ERTS_BIN_DIR/nodetool -sname $USER rpc nitrogen_dev command" 
+NODETOOL_RPC="$ERTS_BIN_DIR/escript $ERTS_BIN_DIR/nodetool -sname $USER rpc"
+DEV_CMD="$NODETOOL_RPC nitrogen_dev command" 
 
 SSH_URL=$PROJECT@$SERVER_URL
 REPO_URL="ssh://$SSH_URL/home/$PROJECT/site.git"
@@ -53,11 +54,8 @@ case $1 in
         shift;
         git_key push $@
         ;;
-    db_init)
-        (cd .. && $ERL_CMD -noshell -eval "db:install(), init:stop()")
-        ;;
-    db_update)
-        (cd .. && $ERL_CMD -noshell -eval "db:update(), init:stop()")
+    db)
+        $NODETOOL_RPC $@
         ;;
     remote)
         shift
