@@ -24,7 +24,7 @@ fi
 ERL_FULLSWEEP_AFTER=10
 ERL_MAX_PORTS=4096
 ERL_LIBS=$NITROGEN_DIR/lib
-ERL_CMD="$ERL_BIN -pa $PROJECT_PATH/ebin -config $NITROGEN_DIR/etc/app -sname "$USER" -config $NITROGEN_DIR/etc/cowboy"
+ERL_CMD="$ERL_BIN -pa $PROJECT_PATH/ebin -config $NITROGEN_DIR/etc/app -sname "$USER" -config $NITROGEN_DIR/etc/cowboy -config $NITROGEN_DIR/etc/simple_bridge.config"
 NODETOOL_RPC="$ERTS_BIN_DIR/escript $ERTS_BIN_DIR/nodetool -sname $USER rpc"
 DEV_CMD="$NODETOOL_RPC nitrogen_dev command" 
 
